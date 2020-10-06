@@ -3,13 +3,13 @@
 	<PropertyGroup>
 		<TargetFramework>netstandard2.0</TargetFramework>
 		<RootNamespace>ContainerSolutions.OperatorSDK</RootNamespace>
-
+		<AssemblyName>ContainerSolutions.Kubernetes.OperatorSDK</AssemblyName>
 		<PackageId>ContainerSolutions.Kubernetes.OperatorSDK</PackageId>
-		<Version>0.6.0</Version>
+		<Version>0.6.1</Version>
 
 		<ApplicationIcon></ApplicationIcon>
 		<Authors>Sebastián Gómez</Authors>
-		<Company></Company>
+		<Company>Container Solutions</Company>
 		<Description>Build Kubernetes Operators in C# (or whatever .NET language) without hassle</Description>
 		<Copyright></Copyright>
 		<PackageLicenseUrl></PackageLicenseUrl>

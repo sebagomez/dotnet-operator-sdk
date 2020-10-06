@@ -1,0 +1,31 @@
+name: Docker
+
+on:
+  push:
+    branches: [ master ]
+    paths:
+    - .github/workflows/docker-publish.yml
+    - samples/mssql-db/**
+
+env:
+  config: Release
+
+jobs:
+  build:
+
+    runs-on: ubuntu-latest
+
+    steps:
+    - uses: actions/checkout@v2
+    - name: Get tagname
+      run: echo ::set-env name=build_number::$(./version.sh)
+    - name: Build and push Docker images
+      uses: docker/build-push-action@v1.1.1
+      with:
+        username: sebagomez
+        password: ${{ secrets.DOCKER_PASSWORD }}
+        repository: sebagomez/k8s-mssqldb
+        tags: latest,${{ env.build_number }}
+        build_args: BUILD=${{ env.build_number }}
+        path: ./samples/mssql-db
+        push: true 

@@ -1,0 +1,31 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio Version 16
+VisualStudioVersion = 16.0.30503.244
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "mssql-db", "samples\mssql-db\mssql-db.csproj", "{074DC3CB-24DC-4576-BB8F-838CDA765A54}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "dotnet-operator-sdk", "src\dotnet-operator-sdk.csproj", "{B92260F5-E100-4A2A-A562-BDA53CF685BF}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{074DC3CB-24DC-4576-BB8F-838CDA765A54}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{074DC3CB-24DC-4576-BB8F-838CDA765A54}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{074DC3CB-24DC-4576-BB8F-838CDA765A54}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{074DC3CB-24DC-4576-BB8F-838CDA765A54}.Release|Any CPU.Build.0 = Release|Any CPU
+		{B92260F5-E100-4A2A-A562-BDA53CF685BF}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{B92260F5-E100-4A2A-A562-BDA53CF685BF}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{B92260F5-E100-4A2A-A562-BDA53CF685BF}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{B92260F5-E100-4A2A-A562-BDA53CF685BF}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {66F3E1DC-F9D7-4A41-8B85-64A67C95911E}
+	EndGlobalSection
+EndGlobal

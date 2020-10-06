@@ -1,0 +1,1 @@
+kubectl run sqlcmd --image=mcr.microsoft.com/mssql-tools -it --rm

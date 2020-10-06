@@ -1,0 +1,58 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: mssql-deployment
+  labels:
+    app: mssql
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: mssql
+  template:
+    metadata:
+      labels:
+        app: mssql
+    spec:
+      containers:
+      - name: mssql
+        image: mcr.microsoft.com/mssql/server:2019-latest
+        ports:
+        - containerPort: 1433
+        env:
+        - name: ACCEPT_EULA
+          value: "Y"
+        - name: SA_PASSWORD
+          valueFrom:
+            secretKeyRef:
+              name: mssql-credentials
+              key: password
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: mssql-service
+spec:
+  type: NodePort
+  selector:
+    app: mssql
+  ports:
+    - protocol: TCP
+      port: 1433
+      targetPort: 1433
+---
+apiVersion: v1
+kind: Secret
+metadata:
+  name: mssql-credentials
+data:
+  userid: c2E=
+  password: TXlOb3RTb1NlY3VyZWRQYTU1d29yZCE=
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: mssql-config
+data:
+  instance: mssql-service
+#  instance: localhost,32393

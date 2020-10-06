@@ -1,0 +1,35 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+	<PropertyGroup>
+		<TargetFramework>netstandard2.0</TargetFramework>
+		<RootNamespace>ContainerSolutions.OperatorSDK</RootNamespace>
+
+		<PackageId>ContainerSolutions.Kubernetes.OperatorSDK</PackageId>
+		<Version>0.6.0</Version>
+
+		<ApplicationIcon></ApplicationIcon>
+		<Authors>Sebastián Gómez</Authors>
+		<Company></Company>
+		<Description>Build Kubernetes Operators in C# (or whatever .NET language) without hassle</Description>
+		<Copyright></Copyright>
+		<PackageLicenseUrl></PackageLicenseUrl>
+		<PackageProjectUrl>https://github.com/ContainerSolutions/dotnet-operator-sdk</PackageProjectUrl>
+		<RepositoryType>git</RepositoryType>
+		<PackageTags>kubernetes,k8s,C#,.net</PackageTags>
+		<PackageIcon>K8sControllerSDK.png</PackageIcon>
+		<RepositoryUrl>https://github.com/ContainerSolutions/dotnet-operator-sdk</RepositoryUrl>
+		<PackageLicenseExpression></PackageLicenseExpression>
+		<PackageReleaseNotes></PackageReleaseNotes>
+
+	</PropertyGroup>
+
+	<ItemGroup>
+		<PackageReference Include="KubernetesClient" Version="2.0.29" />
+		<PackageReference Include="NLog" Version="4.7.4" />
+	</ItemGroup>
+
+	<ItemGroup>
+		<None Include="../res/K8sControllerSDK.png" Pack="true" PackagePath="" />
+	</ItemGroup>
+
+</Project>

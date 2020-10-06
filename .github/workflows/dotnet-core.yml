@@ -1,0 +1,38 @@
+name: Build
+
+on:
+  push:
+    branches: [ master ]
+    paths:
+    - .github/workflows/dotnet-core.yml
+    - src/**
+    - smaples/**    
+
+  pull_request:
+    branches: [ master ]
+    paths:
+    - .github/workflows/dotnet-core.yml
+    - src/**    
+    - smaples/**    
+
+env:
+  config: Release
+  solutionFile: ./dotnet-operator-sdk.sln
+  buildInVS: true
+
+jobs:
+  build:
+
+    runs-on: ubuntu-latest
+
+    steps:
+    - uses: actions/checkout@v2
+    - name: Setup .NET Core
+      uses: actions/setup-dotnet@v1
+      with:
+        dotnet-version: 3.1.301
+    - name: Install dependencies
+      run: dotnet restore $solutionFile
+    - name: Build
+      run: dotnet build --configuration $config --no-restore $solutionFile /property:BuildingInsideVisualStudio=$buildInVS
+ 

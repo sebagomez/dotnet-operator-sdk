@@ -1,0 +1,8 @@
+﻿apiVersion: "samples.k8s-cs-controller/v1"
+kind: MSSQLDB
+metadata:
+  name: db1
+spec:
+  dbname: MyFirstDB
+  configmap: mssql-config
+  credentials: mssql-credentials

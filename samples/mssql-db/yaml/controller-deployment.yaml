@@ -1,0 +1,20 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  labels:
+    app: mssqldb-controller
+  name: mssqldb-controller
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: mssqldb-controller
+  template:
+    metadata:
+      labels:
+        app: mssqldb-controller
+    spec:
+      containers:
+      - image: sebagomez/k8s-mssqldb
+        imagePullPolicy: Always
+        name: mssqldb-controller

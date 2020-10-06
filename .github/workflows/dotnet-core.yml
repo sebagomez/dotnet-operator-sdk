@@ -1,19 +1,6 @@
 name: Build
 
-on:
-  push:
-    branches: [ master ]
-    paths:
-    - .github/workflows/dotnet-core.yml
-    - src/**
-    - smaples/**    
-
-  pull_request:
-    branches: [ master ]
-    paths:
-    - .github/workflows/dotnet-core.yml
-    - src/**    
-    - smaples/**    
+on: [push, pull_request]
 
 env:
   config: Release

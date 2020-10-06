@@ -1,0 +1,36 @@
+name: NuGet
+
+on:
+  push:
+    branches: [ master ]
+    paths:
+    - .github/workflows/nuget-publish.yml
+    - src/**
+
+env:
+  config: Release
+  nugetServer: https://api.nuget.org/v3/index.json
+  projectFile: src/dotnet-operator-sdk.csproj
+
+jobs:
+  build:
+
+    runs-on: ubuntu-latest
+
+    steps:
+    - uses: actions/checkout@v2
+    - name: Setup .NET Core
+      uses: actions/setup-dotnet@v1
+      with:
+        dotnet-version: 3.1.301
+    - name: Install dependencies
+      run: dotnet restore $projectFile
+    - name: Build
+      run: dotnet build --configuration $config --no-restore $projectFile
+    - name: Package
+      run: dotnet pack --configuration $config --no-build --output ./bin $projectFile
+    - name: Publish
+      env: 
+        nuget_apikey: ${{ secrets.NUGET_API_KEY }}
+      run: dotnet nuget push ./bin/*.nupkg -k $nuget_apikey -s $nugetServer
+ 

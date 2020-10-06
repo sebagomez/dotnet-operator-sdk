@@ -5,7 +5,7 @@ on: [push, pull_request]
 env:
   config: Release
   solutionFile: ./dotnet-operator-sdk.sln
-  buildInVS: true
+  buildInVS: false
 
 jobs:
   build:

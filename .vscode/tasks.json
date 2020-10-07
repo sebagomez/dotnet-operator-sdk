@@ -7,7 +7,7 @@
             "type": "process",
             "args": [
                 "build",
-                "${workspaceFolder}/samples/mssql-db/mssql-db.csproj",
+                "${workspaceFolder}/dotnet-operator-sdk.sln",
                 "/property:GenerateFullPaths=true",
                 "/property:BuildingInsideVisualStudio=true",
                 "/consoleloggerparameters:NoSummary"

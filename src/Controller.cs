@@ -1,8 +1,10 @@
 ﻿using System;
+using System.Diagnostics;
 using System.Threading;
 using System.Threading.Tasks;
 using k8s;
 using k8s.Models;
+using Microsoft.Rest;
 using NLog;
 using NLog.Config;
 using NLog.Targets;
@@ -66,7 +68,23 @@ namespace ContainerSolutions.OperatorSDK
 
         public async Task SatrtAsync(string k8sNamespace = "")
         {
-            var listResponse = await Kubernetes.ListNamespacedCustomObjectWithHttpMessagesAsync(m_crd.Group, m_crd.Version, k8sNamespace, m_crd.Plural, watch: true);
+            Stopwatch watch = new Stopwatch();
+            HttpOperationResponse<object> listResponse = null;
+            while (listResponse == null)
+            {
+                try
+                {
+                    watch.Start();
+                    listResponse = await Kubernetes.ListNamespacedCustomObjectWithHttpMessagesAsync(m_crd.Group, m_crd.Version, k8sNamespace, m_crd.Plural, watch: true);
+                }
+                catch (TaskCanceledException)
+                {
+                    watch.Stop();
+                    Log.Info($"Listener timed out after {watch.Elapsed.TotalSeconds} seconds. Trying to reconnect.");
+                    watch.Reset();
+                    // just check again
+                }
+            }
 
             m_watcher = listResponse.Watch<T, object>(this.OnTChange, this.OnError);
 
@@ -76,11 +94,11 @@ namespace ContainerSolutions.OperatorSDK
         {
             return Task.Run(() =>
             {
-				Log.Info($"Reconciliation Loop for CRD {m_crd.Singular} will run every {m_crd.ReconciliationCheckInterval} seconds.");
+                Log.Info($"Reconciliation Loop for CRD {m_crd.Singular} will run every {m_crd.ReconciliationCheckInterval} seconds.");
 
                 while (true)
                 {
-					Thread.Sleep(m_crd.ReconciliationCheckInterval * 1000);
+                    Thread.Sleep(m_crd.ReconciliationCheckInterval * 1000);
 
                     m_handler.CheckCurrentState(Kubernetes);
                 }

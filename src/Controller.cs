@@ -77,8 +77,11 @@ namespace ContainerSolutions.OperatorSDK
                     watch.Start();
                     listResponse = await Kubernetes.ListNamespacedCustomObjectWithHttpMessagesAsync(m_crd.Group, m_crd.Version, k8sNamespace, m_crd.Plural, watch: true);
                 }
-                catch (TaskCanceledException)
+                catch (TaskCanceledException) 
                 {
+                    //this catch should be gone after issue #494 on the KubernetesClient gets fixed
+                    //https://github.com/kubernetes-client/csharp/issues/494
+
                     watch.Stop();
                     Log.Info($"Listener timed out after {watch.Elapsed.TotalSeconds} seconds. Trying to reconnect.");
                     watch.Reset();

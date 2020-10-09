@@ -1,4 +1,4 @@
-﻿apiVersion: "samples.k8s-cs-controller/v1"
+﻿apiVersion: samples.k8s-dotnet-controller-sdk/v1
 kind: MSSQLDB
 metadata:
   name: db1

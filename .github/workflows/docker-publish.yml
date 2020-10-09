@@ -6,6 +6,7 @@ on:
     paths:
     - .github/workflows/docker-publish.yml
     - samples/mssql-db/**
+    - src/**
 
 env:
   config: Release

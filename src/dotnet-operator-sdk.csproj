@@ -5,7 +5,7 @@
 		<RootNamespace>ContainerSolutions.OperatorSDK</RootNamespace>
 		<AssemblyName>ContainerSolutions.Kubernetes.OperatorSDK</AssemblyName>
 		<PackageId>ContainerSolutions.Kubernetes.OperatorSDK</PackageId>
-		<Version>0.6.2</Version>
+		<Version>0.6.3</Version>
 
 		<ApplicationIcon></ApplicationIcon>
 		<Authors>Sebastián Gómez</Authors>
@@ -24,9 +24,13 @@
 	</PropertyGroup>
 
 	<ItemGroup>
-		<PackageReference Include="KubernetesClient" Version="2.0.29" />
+		<PackageReference Include="KubernetesClient" Version="2.0.33" />
 		<PackageReference Include="NLog" Version="4.7.4" />
 	</ItemGroup>
+
+	<!-- <ItemGroup>
+		<ProjectReference Include="../../k8s-csharp/src/KubernetesClient/KubernetesClient.csproj" />
+	</ItemGroup> -->
 
 	<ItemGroup>
 		<None Include="../res/K8sControllerSDK.png" Pack="true" PackagePath="" />

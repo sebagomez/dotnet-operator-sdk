@@ -77,6 +77,15 @@ namespace ContainerSolutions.OperatorSDK
                     watch.Start();
                     listResponse = await Kubernetes.ListNamespacedCustomObjectWithHttpMessagesAsync(m_crd.Group, m_crd.Version, k8sNamespace, m_crd.Plural, watch: true);
                 }
+                catch (HttpOperationException hoex)
+                {
+                    if (hoex.Response.StatusCode != System.Net.HttpStatusCode.NotFound)
+                        throw hoex;
+
+                    Log.Warn($"No CustomResourceDefinition found for '{m_crd.Plural}', group '{m_crd.Group}' and version '{m_crd.Version}' on namespace '{k8sNamespace}'.");
+                    Log.Info($"Checking again in {m_crd.ReconciliationCheckInterval} seconds...");
+                    Thread.Sleep(m_crd.ReconciliationCheckInterval * 1000);
+                }
                 catch (TaskCanceledException) 
                 {
                     //this catch should be gone after issue #494 on the KubernetesClient gets fixed

@@ -1,4 +1,5 @@
-![Docker](https://github.com/ContainerSolutions/dotnet-operator-sdk/workflows/Docker/badge.svg)
+[![Docker](https://github.com/ContainerSolutions/dotnet-operator-sdk/workflows/Docker/badge.svg)](https://hub.docker.com/repository/docker/sebagomez/k8s-mssqldb)
+
 ## Microsoft SQL Server Database operator
 
 ### Definition

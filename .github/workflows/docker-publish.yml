@@ -19,7 +19,7 @@ jobs:
     steps:
     - uses: actions/checkout@v2
     - name: Get tagname
-      run: echo "build_number=$(./samples/mssql-db/sdk-version.sh)" >> $GITHUB_ENV
+      run: echo "build_number=$(./samples/mssql-db/version.sh)" >> $GITHUB_ENV
     - name: Build and push Docker images
       uses: docker/build-push-action@v1.1.1
       with:

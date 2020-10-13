@@ -18,6 +18,8 @@ jobs:
 
     steps:
     - uses: actions/checkout@v2
+    - name: Install XMLLint
+      run: sudo apt-get install libxml2-utils
     - name: Get tagname
       run: echo "build_number=$(./samples/mssql-db/version.sh)" >> $GITHUB_ENV
     - name: Build and push Docker images

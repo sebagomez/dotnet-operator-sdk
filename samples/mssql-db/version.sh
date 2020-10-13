@@ -1,0 +1,1 @@
+xmllint --xpath 'string(//Version)' ./samples/mssql-db/mssql-db.csproj

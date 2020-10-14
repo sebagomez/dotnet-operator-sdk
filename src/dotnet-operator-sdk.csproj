@@ -5,7 +5,7 @@
 		<RootNamespace>ContainerSolutions.OperatorSDK</RootNamespace>
 		<AssemblyName>ContainerSolutions.Kubernetes.OperatorSDK</AssemblyName>
 		<PackageId>ContainerSolutions.Kubernetes.OperatorSDK</PackageId>
-		<Version>0.6.3</Version>
+		<Version>0.6.4</Version>
 
 		<ApplicationIcon></ApplicationIcon>
 		<Authors>Sebastián Gómez</Authors>

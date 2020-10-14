@@ -77,16 +77,13 @@ namespace ContainerSolutions.OperatorSDK
                     watch.Start();
                     listResponse = await Kubernetes.ListNamespacedCustomObjectWithHttpMessagesAsync(m_crd.Group, m_crd.Version, k8sNamespace, m_crd.Plural, watch: true);
                 }
-                catch (HttpOperationException hoex)
+                catch (HttpOperationException hoex) when (hoex.Response.StatusCode == System.Net.HttpStatusCode.NotFound)
                 {
-                    if (hoex.Response.StatusCode != System.Net.HttpStatusCode.NotFound)
-                        throw hoex;
-
                     Log.Warn($"No CustomResourceDefinition found for '{m_crd.Plural}', group '{m_crd.Group}' and version '{m_crd.Version}' on namespace '{k8sNamespace}'.");
                     Log.Info($"Checking again in {m_crd.ReconciliationCheckInterval} seconds...");
                     Thread.Sleep(m_crd.ReconciliationCheckInterval * 1000);
                 }
-                catch (TaskCanceledException) 
+                catch (TaskCanceledException)
                 {
                     //this catch should be gone after issue #494 on the KubernetesClient gets fixed
                     //https://github.com/kubernetes-client/csharp/issues/494
@@ -126,32 +123,41 @@ namespace ContainerSolutions.OperatorSDK
         private async void OnTChange(WatchEventType type, T item)
         {
             Log.Info($"{typeof(T)} {item.Name()} {type} on Namespace {item.Namespace()}");
-            switch (type)
+
+            try
             {
-                case WatchEventType.Added:
-                    if (m_handler != null)
-                        await m_handler.OnAdded(Kubernetes, item);
-                    return;
-                case WatchEventType.Modified:
-                    if (m_handler != null)
-                        await m_handler.OnUpdated(Kubernetes, item);
-                    return;
-                case WatchEventType.Deleted:
-                    if (m_handler != null)
-                        await m_handler.OnDeleted(Kubernetes, item);
-                    return;
-                case WatchEventType.Bookmark:
-                    if (m_handler != null)
-                        await m_handler.OnBookmarked(Kubernetes, item);
-                    return;
-                case WatchEventType.Error:
-                    if (m_handler != null)
-                        await m_handler.OnError(Kubernetes, item);
-                    return;
-                default:
-                    Log.Warn($"Don't know what to do with {type}");
-                    break;
-            };
+                switch (type)
+                {
+                    case WatchEventType.Added:
+                        if (m_handler != null)
+                            await m_handler.OnAdded(Kubernetes, item);
+                        return;
+                    case WatchEventType.Modified:
+                        if (m_handler != null)
+                            await m_handler.OnUpdated(Kubernetes, item);
+                        return;
+                    case WatchEventType.Deleted:
+                        if (m_handler != null)
+                            await m_handler.OnDeleted(Kubernetes, item);
+                        return;
+                    case WatchEventType.Bookmark:
+                        if (m_handler != null)
+                            await m_handler.OnBookmarked(Kubernetes, item);
+                        return;
+                    case WatchEventType.Error:
+                        if (m_handler != null)
+                            await m_handler.OnError(Kubernetes, item);
+                        return;
+                    default:
+                        Log.Warn($"Don't know what to do with {type}");
+                        break;
+                };
+            }
+            catch (Exception ex)
+            {
+                Log.Error($"An error occurred on the '{type}' call of {item.Name()} ({typeof(T)})");
+                Log.Error(ex);
+            }
         }
 
         private void OnError(Exception exception)

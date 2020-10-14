@@ -33,6 +33,7 @@ namespace mssql_db
 			catch (Exception ex)
 			{
 				Log.Fatal(ex);
+				throw;
 			}
 			finally
 			{

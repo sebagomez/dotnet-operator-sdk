@@ -9,32 +9,72 @@ using k8s;
 using k8s.Models;
 using ContainerSolutions.OperatorSDK;
 using NLog;
+using Microsoft.Rest;
 
 namespace mssql_db
 {
     public class MSSQLDBOperationHandler : IOperationHandler<MSSQLDB>
     {
+        const string INSTANCE = "instance";
+        const string USER_ID = "userid";
+        const string PASSWORD = "password";
+        const string MASTER = "master";
+
         Dictionary<string, MSSQLDB> m_currentState = new Dictionary<string, MSSQLDB>();
 
         private static readonly Logger Log = LogManager.GetCurrentClassLogger();
 
         SqlConnection GetDBConnection(Kubernetes k8s, MSSQLDB db)
         {
-            var configMap = k8s.ReadNamespacedConfigMap(db.Spec.ConfigMap, db.Namespace());
-            string instance = configMap.Data["instance"];
-            var secret = k8s.ReadNamespacedSecret(db.Spec.Credentials, db.Namespace());
-            string dbUser = ASCIIEncoding.UTF8.GetString(secret.Data["userid"]);
-            string password = ASCIIEncoding.UTF8.GetString(secret.Data["password"]);
+            var configMap = GetConfigMap(k8s, db);
+            if (!configMap.Data.ContainsKey(INSTANCE))
+                throw new ApplicationException($"ConfigMap '{configMap.Name()}' does not contain the '{INSTANCE}' data property.");
+
+            string instance = configMap.Data[INSTANCE];
+            
+            var secret = GetSecret(k8s, db);
+            if (!secret.Data.ContainsKey(USER_ID))
+                throw new ApplicationException($"Secret '{secret.Name()}' does not contain the '{USER_ID}' data property.");
+
+            if (!secret.Data.ContainsKey(PASSWORD))
+                throw new ApplicationException($"Secret '{secret.Name()}' does not contain the '{PASSWORD}' data property.");
+
+            string dbUser = ASCIIEncoding.UTF8.GetString(secret.Data[USER_ID]);
+            string password = ASCIIEncoding.UTF8.GetString(secret.Data[PASSWORD]);
 
             SqlConnectionStringBuilder builder = new SqlConnectionStringBuilder
             {
                 DataSource = instance,
                 UserID = dbUser,
                 Password = password,
-                InitialCatalog = "master"
+                InitialCatalog = MASTER
             };
 
             return new SqlConnection(builder.ConnectionString);
+        }
+
+        V1ConfigMap GetConfigMap(Kubernetes k8s, MSSQLDB db)
+        {
+            try
+            {
+                return k8s.ReadNamespacedConfigMap(db.Spec.ConfigMap, db.Namespace());
+            }
+            catch (HttpOperationException hoex) when (hoex.Response.StatusCode == System.Net.HttpStatusCode.NotFound)
+            {
+                throw new ApplicationException($"ConfigMap '{db.Spec.ConfigMap}' not found in namespace {db.Namespace()}");
+            }
+        }
+
+        V1Secret GetSecret(Kubernetes k8s, MSSQLDB db)
+        {
+            try
+            {
+                return k8s.ReadNamespacedSecret(db.Spec.Credentials, db.Namespace());
+            }
+            catch (HttpOperationException hoex) when (hoex.Response.StatusCode == System.Net.HttpStatusCode.NotFound)
+            {
+                throw new ApplicationException($"Secret '{db.Spec.Credentials}' not found in namespace {db.Namespace()}");
+            }
         }
 
         public Task OnAdded(Kubernetes k8s, MSSQLDB crd)
@@ -47,7 +87,7 @@ namespace mssql_db
 
         public Task OnBookmarked(Kubernetes k8s, MSSQLDB crd)
         {
-            Log.Warn($"DATABASE {crd.Spec.DBName} was BOOKMARKED (???)");
+            Log.Warn($"MSSQLDB {crd.Name()} was BOOKMARKED (???)");
 
             return Task.CompletedTask;
         }
@@ -56,7 +96,7 @@ namespace mssql_db
         {
             lock (m_currentState)
             {
-                Log.Info($"DATABASE {crd.Spec.DBName} will be DELETED!");
+                Log.Info($"MSSQLDB {crd.Name()} must be deleted! ({crd.Spec.DBName})");
 
                 using (SqlConnection connection = GetDBConnection(k8s, crd))
                 {
@@ -85,7 +125,7 @@ namespace mssql_db
                     }
 
                     m_currentState.Remove(crd.Name());
-                    Log.Info($"DATABASE {crd.Spec.DBName} successfully deleted!");
+                    Log.Info($"Database {crd.Spec.DBName} successfully dropped!");
 
                 }
 
@@ -95,14 +135,14 @@ namespace mssql_db
 
         public Task OnError(Kubernetes k8s, MSSQLDB crd)
         {
-            Log.Error($"ERROR on {crd.Spec.DBName}");
+            Log.Error($"ERROR on {crd.Name()}");
 
             return Task.CompletedTask;
         }
 
         public Task OnUpdated(Kubernetes k8s, MSSQLDB crd)
         {
-            Log.Warn($"DATABASE {crd.Spec.DBName} was UPDATED");
+            Log.Info($"MSSQLDB {crd.Name()} was updated. ({crd.Spec.DBName})");
 
             MSSQLDB currentDb = m_currentState[crd.Name()];
 
@@ -117,6 +157,7 @@ namespace mssql_db
                 catch (Exception ex)
                 {
                     Log.Fatal(ex);
+                    throw;
                 }
             }
             else
@@ -143,7 +184,7 @@ namespace mssql_db
 
                             if (i == 0)
                             {
-                                Log.Warn($"Database {db.Spec.DBName} was not found!");
+                                Log.Warn($"Database {db.Spec.DBName} ({db.Name()}) was not found!");
                                 CreateDB(k8s, db);
                             }
                         }
@@ -155,12 +196,12 @@ namespace mssql_db
                 }
             }
 
-			return Task.CompletedTask;
+            return Task.CompletedTask;
         }
 
         void CreateDB(Kubernetes k8s, MSSQLDB db)
         {
-            Log.Info($"DATABASE {db.Spec.DBName} will be ADDED");
+            Log.Info($"Database {db.Spec.DBName} must be created.");
 
             using (SqlConnection connection = GetDBConnection(k8s, db))
             {
@@ -171,26 +212,20 @@ namespace mssql_db
                     SqlCommand createCommand = new SqlCommand($"CREATE DATABASE {db.Spec.DBName};", connection);
                     int i = createCommand.ExecuteNonQuery();
                 }
-                catch (SqlException sex)
+                catch (SqlException sex) when (sex.Number == 1801) //Database already exists
                 {
-                    if (sex.Number == 1801) //Database already exists
-                    {
-                        Log.Warn(sex.Message);
-                        m_currentState[db.Name()] = db;
-                        return;
-                    }
-
-                    Log.Error(sex.Message);
+                    Log.Warn(sex.Message);
+                    m_currentState[db.Name()] = db;
                     return;
                 }
                 catch (Exception ex)
                 {
                     Log.Fatal(ex.Message);
-                    return;
+                    throw;
                 }
 
                 m_currentState[db.Name()] = db;
-                Log.Info($"DATABASE {db.Spec.DBName} successfully created!");
+                Log.Info($"Database {db.Spec.DBName} successfully created!");
             }
         }
 

@@ -7,35 +7,36 @@
 This is a controller for a newly defined `CustomResourceDefinition` (CRD) that lets you create or delete (drop) databases from a Microsoft SQL Server `Pod` running in your Kubernetes cluster.
 
 ```yaml
-apiVersion: apiextensions.k8s.io/v1beta1
+apiVersion: apiextensions.k8s.io/v1
 kind: CustomResourceDefinition
 metadata:
-  name: mssqldbs.samples.k8s-cs-controller
-spec:P
-  group: samples.k8s-cs-controller
-  version: v1
-  subresources:
-    status: {}
+  name: mssqldbs.samples.k8s-dotnet-controller-sdk
+spec:
+  group: samples.k8s-dotnet-controller-sdk
   scope: Namespaced
   names:
     plural: mssqldbs
     singular: mssqldb
     kind: MSSQLDB
-  validation:
-    openAPIV3Schema:
-      type: object
-      description: "A Microsoft SQLServer Database"
-      properties:
-        spec:
+  versions:
+    - name: v1
+      served: true
+      storage: true
+      schema:
+        openAPIV3Schema:
           type: object
+          description: "A Microsoft SQLServer Database"
           properties:
-            dbname:
-              type: string
-            configmap:
-              type: string
-            data:
-              credentials: string
-          required: ["dbname","configmap", "credentials"]
+            spec:
+              type: object
+              properties:
+                dbname:
+                  type: string
+                configmap:
+                  type: string
+                credentials:
+                  type: string
+              required: ["dbname","configmap", "credentials"]
 ```
 
 This `CRD` has three properties, `dbname`, `configmap`, and `credentials`. All three of them are strings, but they all have different semantics.  

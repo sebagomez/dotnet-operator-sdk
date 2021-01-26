@@ -13,7 +13,7 @@
 	</PropertyGroup>
 
 	<ItemGroup>
-		<PackageReference Include="ContainerSolutions.Kubernetes.OperatorSDK" Version="0.6.4" Condition="'$(BuildingInsideVisualStudio)' != 'true'"/>
+		<PackageReference Include="ContainerSolutions.Kubernetes.OperatorSDK" Version="0.7.0" Condition="'$(BuildingInsideVisualStudio)' != 'true'"/>
 		<PackageReference Include="System.Data.SqlClient" Version="4.8.2" />
 	</ItemGroup>
 

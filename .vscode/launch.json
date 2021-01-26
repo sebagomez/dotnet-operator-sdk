@@ -10,7 +10,7 @@
             "request": "launch",
             "preLaunchTask": "build",
             // If you have changed target frameworks, make sure to update the program path.
-            "program": "${workspaceFolder}/samples/mssql-db/bin/Debug/netcoreapp3.1/mssql-db.dll",
+            "program": "${workspaceFolder}/samples/mssql-db/bin/Debug/net5.0/mssql-db.dll",
             "args": [],
             "cwd": "${workspaceFolder}/samples/mssql-db",
             // For more information about the 'console' field, see https://aka.ms/VSCode-CS-LaunchJson-Console

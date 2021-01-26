@@ -1,11 +1,11 @@
 <Project Sdk="Microsoft.NET.Sdk">
 
 	<PropertyGroup>
-		<TargetFramework>netstandard2.0</TargetFramework>
+		<TargetFramework>net5.0</TargetFramework>
 		<RootNamespace>ContainerSolutions.OperatorSDK</RootNamespace>
 		<AssemblyName>ContainerSolutions.Kubernetes.OperatorSDK</AssemblyName>
 		<PackageId>ContainerSolutions.Kubernetes.OperatorSDK</PackageId>
-		<Version>0.6.4</Version>
+		<Version>0.7.0</Version>
 
 		<ApplicationIcon></ApplicationIcon>
 		<Authors>Sebastián Gómez</Authors>
@@ -24,8 +24,8 @@
 	</PropertyGroup>
 
 	<ItemGroup>
-		<PackageReference Include="KubernetesClient" Version="2.0.33" />
-		<PackageReference Include="NLog" Version="4.7.4" />
+		<PackageReference Include="KubernetesClient" Version="4.0.5" />
+		<PackageReference Include="NLog" Version="4.7.7" />
 	</ItemGroup>
 
 	<!-- <ItemGroup>

@@ -14,12 +14,11 @@ namespace ContainerSolutions.OperatorSDK
     public class Controller<T> where T : BaseCRD
     {
         private static readonly Logger Log = LogManager.GetCurrentClassLogger();
-
         public Kubernetes Kubernetes { get; private set; }
-
         private readonly IOperationHandler<T> m_handler;
         private readonly T m_crd;
-        private Watcher<T> m_watcher;
+        private Watcher<T> m_watcher = null;
+        private string m_k8sNamespace;
 
         static Controller()
         {
@@ -27,6 +26,7 @@ namespace ContainerSolutions.OperatorSDK
         }
 
         static bool s_loggerConfiged = false;
+
         public static void ConfigLogger()
         {
             if (!s_loggerConfiged)
@@ -44,7 +44,7 @@ namespace ContainerSolutions.OperatorSDK
             }
         }
 
-        public Controller(T crd, IOperationHandler<T> handler)
+        public Controller(T crd, IOperationHandler<T> handler, string k8sNamespace = "")
         {
             KubernetesClientConfiguration config;
             if (KubernetesClientConfiguration.IsInCluster())
@@ -57,6 +57,7 @@ namespace ContainerSolutions.OperatorSDK
             }
 
             Kubernetes = new Kubernetes(config);
+            m_k8sNamespace = k8sNamespace;
             m_crd = crd;
             m_handler = handler;
         }
@@ -66,39 +67,42 @@ namespace ContainerSolutions.OperatorSDK
             DisposeWatcher();
         }
 
-        public async Task SatrtAsync(string k8sNamespace = "")
+        private async Task<bool> IsCRDAvailable()
         {
-            Stopwatch watch = new Stopwatch();
-            HttpOperationResponse<object> listResponse = null;
-            while (listResponse == null)
+            try
             {
-                try
-                {
-                    watch.Start();
-                    listResponse = await Kubernetes.ListNamespacedCustomObjectWithHttpMessagesAsync(m_crd.Group, m_crd.Version, k8sNamespace, m_crd.Plural, watch: true);
-                }
-                catch (HttpOperationException hoex) when (hoex.Response.StatusCode == System.Net.HttpStatusCode.NotFound)
-                {
-                    Log.Warn($"No CustomResourceDefinition found for '{m_crd.Plural}', group '{m_crd.Group}' and version '{m_crd.Version}' on namespace '{k8sNamespace}'.");
-                    Log.Info($"Checking again in {m_crd.ReconciliationCheckInterval} seconds...");
-                    Thread.Sleep(m_crd.ReconciliationCheckInterval * 1000);
-                }
-                catch (TaskCanceledException)
-                {
-                    //this catch should be gone after issue #494 on the KubernetesClient gets fixed
-                    //https://github.com/kubernetes-client/csharp/issues/494
+                await Kubernetes.ListNamespacedCustomObjectWithHttpMessagesAsync(m_crd.Group, m_crd.Version, m_k8sNamespace, m_crd.Plural);
+            }
+            catch (HttpOperationException hoex) when (hoex.Response.StatusCode == System.Net.HttpStatusCode.NotFound)
+            {
+                Log.Warn($"No CustomResourceDefinition found for '{m_crd.Plural}', group '{m_crd.Group}' and version '{m_crd.Version}' on namespace '{m_k8sNamespace}'.");
+                Log.Info($"Checking again in {m_crd.ReconciliationCheckInterval} seconds...");
 
-                    watch.Stop();
-                    Log.Info($"Listener timed out after {watch.Elapsed.TotalSeconds} seconds. Trying to reconnect.");
-                    watch.Reset();
-                    // just check again
-                }
+                return false;
             }
 
-            m_watcher = listResponse.Watch<T, object>(this.OnTChange, this.OnError);
+            return true;
+        }
 
+        public async Task SatrtAsync()
+        {
+            while(! await IsCRDAvailable())
+                Thread.Sleep(m_crd.ReconciliationCheckInterval * 1000);
+
+            StartWatcher();
             await ReconciliationLoop();
         }
+
+        private void StartWatcher()
+        {
+            Task<HttpOperationResponse<object>> listResponse = null;
+            DisposeWatcher();
+
+            listResponse = Kubernetes.ListNamespacedCustomObjectWithHttpMessagesAsync(m_crd.Group, m_crd.Version, m_k8sNamespace, m_crd.Plural, watch: true);
+
+            m_watcher = listResponse.Watch<T, object>(this.OnTChange, this.OnError, this.OnClose);
+        }
+
         private Task ReconciliationLoop()
         {
             return Task.Run(() =>
@@ -162,7 +166,23 @@ namespace ContainerSolutions.OperatorSDK
 
         private void OnError(Exception exception)
         {
+            if (exception is TaskCanceledException)
+            {
+                TaskCanceledException tcex = exception as TaskCanceledException;
+                if (tcex.InnerException != null && tcex.InnerException is TimeoutException)
+                {
+                    DisposeWatcher();
+                    return;
+                }
+                    
+            }
             Log.Fatal(exception);
+        }
+
+        private void OnClose()
+        {
+            Log.Fatal($"Connection Closed. Restarting {m_crd.Plural} Operator");
+            SatrtAsync().GetAwaiter().GetResult();
         }
     }
 }

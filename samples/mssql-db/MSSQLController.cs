@@ -22,8 +22,8 @@ namespace mssql_db
 				Log.Info($"=== {nameof(MSSQLController)} STARTING for namespace {k8sNamespace} ===");
 
 				MSSQLDBOperationHandler handler = new MSSQLDBOperationHandler();
-				Controller<MSSQLDB> controller = new Controller<MSSQLDB>(new MSSQLDB(), handler);
-				Task reconciliation = controller.SatrtAsync(k8sNamespace);
+				Controller<MSSQLDB> controller = new Controller<MSSQLDB>(new MSSQLDB(), handler, k8sNamespace);
+				Task reconciliation = controller.SatrtAsync();
 
 				Log.Info($"=== {nameof(MSSQLController)} STARTED ===");
 
@@ -33,7 +33,7 @@ namespace mssql_db
 			catch (Exception ex)
 			{
 				Log.Fatal(ex);
-				throw;
+					throw;
 			}
 			finally
 			{

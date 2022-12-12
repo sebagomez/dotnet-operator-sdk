@@ -1,11 +1,11 @@
 <Project Sdk="Microsoft.NET.Sdk">
 
 	<PropertyGroup>
-		<TargetFramework>net5.0</TargetFramework>
+		<TargetFramework>net6.0</TargetFramework>
 		<RootNamespace>ContainerSolutions.OperatorSDK</RootNamespace>
 		<AssemblyName>ContainerSolutions.Kubernetes.OperatorSDK</AssemblyName>
 		<PackageId>ContainerSolutions.Kubernetes.OperatorSDK</PackageId>
-		<Version>0.7.0</Version>
+		<Version>0.8.0</Version>
 
 		<ApplicationIcon></ApplicationIcon>
 		<Authors>Sebastián Gómez</Authors>

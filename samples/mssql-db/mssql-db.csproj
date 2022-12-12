@@ -2,11 +2,11 @@
     
 	<PropertyGroup>
 		<OutputType>Exe</OutputType>
-		<TargetFramework>net5.0</TargetFramework>
+		<TargetFramework>net6.0</TargetFramework>
 		<RootNamespace>mssql_db</RootNamespace>
 
 		<PackageId>mssqldbs.samples.dotnet-operator-sdk</PackageId>
-		<Version>1.2.0</Version>
+		<Version>1.3.0</Version>
 		<Authors>Sebastián Gómez</Authors>
 		<Company>Container Solutions</Company>
 

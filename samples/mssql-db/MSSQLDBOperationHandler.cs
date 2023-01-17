@@ -24,7 +24,7 @@ namespace mssql_db
 
         private static readonly Logger Log = LogManager.GetCurrentClassLogger();
 
-        SqlConnection GetDBConnection(Kubernetes k8s, MSSQLDB db)
+        SqlConnection GetDBConnection(IKubernetes k8s, MSSQLDB db)
         {
             var configMap = GetConfigMap(k8s, db);
             if (!configMap.Data.ContainsKey(INSTANCE))
@@ -53,7 +53,7 @@ namespace mssql_db
             return new SqlConnection(builder.ConnectionString);
         }
 
-        V1ConfigMap GetConfigMap(Kubernetes k8s, MSSQLDB db)
+        V1ConfigMap GetConfigMap(IKubernetes k8s, MSSQLDB db)
         {
             try
             {
@@ -65,7 +65,7 @@ namespace mssql_db
             }
         }
 
-        V1Secret GetSecret(Kubernetes k8s, MSSQLDB db)
+        V1Secret GetSecret(IKubernetes k8s, MSSQLDB db)
         {
             try
             {
@@ -77,7 +77,7 @@ namespace mssql_db
             }
         }
 
-        public Task OnAdded(Kubernetes k8s, MSSQLDB crd)
+        public Task OnAdded(IKubernetes k8s, MSSQLDB crd)
         {
             lock (m_currentState)
                 CreateDB(k8s, crd);
@@ -85,14 +85,14 @@ namespace mssql_db
             return Task.CompletedTask;
         }
 
-        public Task OnBookmarked(Kubernetes k8s, MSSQLDB crd)
+        public Task OnBookmarked(IKubernetes k8s, MSSQLDB crd)
         {
             Log.Warn($"MSSQLDB {crd.Name()} was BOOKMARKED (???)");
 
             return Task.CompletedTask;
         }
 
-        public Task OnDeleted(Kubernetes k8s, MSSQLDB crd)
+        public Task OnDeleted(IKubernetes k8s, MSSQLDB crd)
         {
             lock (m_currentState)
             {
@@ -133,14 +133,14 @@ namespace mssql_db
             }
         }
 
-        public Task OnError(Kubernetes k8s, MSSQLDB crd)
+        public Task OnError(IKubernetes k8s, MSSQLDB crd)
         {
             Log.Error($"ERROR on {crd.Name()}");
 
             return Task.CompletedTask;
         }
 
-        public Task OnUpdated(Kubernetes k8s, MSSQLDB crd)
+        public Task OnUpdated(IKubernetes k8s, MSSQLDB crd)
         {
             Log.Info($"MSSQLDB {crd.Name()} was updated. ({crd.Spec.DBName})");
 
@@ -166,7 +166,7 @@ namespace mssql_db
             return Task.CompletedTask;
         }
 
-        public Task CheckCurrentState(Kubernetes k8s)
+        public Task CheckCurrentState(IKubernetes k8s)
         {
             lock (m_currentState)
             {
@@ -199,7 +199,7 @@ namespace mssql_db
             return Task.CompletedTask;
         }
 
-        void CreateDB(Kubernetes k8s, MSSQLDB db)
+        void CreateDB(IKubernetes k8s, MSSQLDB db)
         {
             Log.Info($"Database {db.Spec.DBName} must be created.");
 
@@ -229,7 +229,7 @@ namespace mssql_db
             }
         }
 
-        void RenameDB(Kubernetes k8s, MSSQLDB currentDB, MSSQLDB newDB)
+        void RenameDB(IKubernetes k8s, MSSQLDB currentDB, MSSQLDB newDB)
         {
             string sqlCommand = @$"ALTER DATABASE {currentDB.Spec.DBName} SET SINGLE_USER WITH ROLLBACK IMMEDIATE;
 ALTER DATABASE {currentDB.Spec.DBName} MODIFY NAME = {newDB.Spec.DBName};

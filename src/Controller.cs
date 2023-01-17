@@ -14,7 +14,7 @@ namespace ContainerSolutions.OperatorSDK
     public class Controller<T> where T : BaseCRD
     {
         private static readonly Logger Log = LogManager.GetCurrentClassLogger();
-        public Kubernetes Kubernetes { get; private set; }
+        public IKubernetes Kubernetes { get; private set; }
         private readonly IOperationHandler<T> m_handler;
         private readonly T m_crd;
         private Watcher<T> m_watcher = null;
